@@ -6,8 +6,8 @@ import string
 import gzip
 import pickle
 import json
+import datetime
 
-import nltk
 from nltk.tokenize import TweetTokenizer,RegexpTokenizer,WordPunctTokenizer
 
 import random
@@ -295,13 +295,8 @@ class Textpipeline:
         return tfidf_vectorizer    
         
     def load_vectorized_arrays(self):
-        # uncompress the tfidf-array
-        FILE_NAME = './data/tfidf_array_copy.pkl.gz'
-        with gzip.open(FILE_NAME,'rb') as f:
-            compressed_array = f.read()
-        # you have decompressed content while reading, now unpickle the tfidf array
-        tfidf_array = pickle.loads(compressed_array)
-        return tfidf_array
+        global vectorized_array
+        return vectorized_array
     
     def load_dataframe(self):
         FILE_NAME = './data/dataframe_copy.pickle'
@@ -338,7 +333,6 @@ class Textpipeline:
             assert similarity_array.max() > 0.30,'no_response'
             multiple_matches = False
             indices = np.where(similarity_array == similarity_array.max())[0]
-            print(indices)
             if len(indices)>1:
                 multiple_matches = True
             highest_score_index = int(indices[0])
