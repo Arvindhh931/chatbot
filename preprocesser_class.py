@@ -295,8 +295,10 @@ class Textpipeline:
         return tfidf_vectorizer    
         
     def load_vectorized_arrays(self):
-        global vectorized_array
-        return vectorized_array
+        FILE_NAME = './data/csr_array_copy.pickle'
+        with open(FILE_NAME,'rb') as f:
+            tfidf_arrays = pickle.load(f)
+        return tfidf_arrays
     
     def load_dataframe(self):
         FILE_NAME = './data/dataframe_copy.pickle'
@@ -340,77 +342,3 @@ class Textpipeline:
             return df['response'].iloc[highest_score_index]
         except AssertionError as A:
             return None
-            
-# --------------------------------------------------------------------------------------
-
-class Conversation:
-    def __init__(self):
-        pass
-    
-    def greeting(self):
-        hour = datetime.datetime.now().hour
-        if 0 < hour <= 11:
-            return 'Hello ! good morning, How can i help you with HRMS related needs ?'
-        elif 11 < hour <= 16:
-            return 'Hello ! good after noon, How can i help you with HRMS related needs ?'
-        elif 16 < hour <= 20:
-            return 'Hello ! good evening, How can i help you with HRMS related needs ?'
-        else:        
-            return 'Hello ! How can i help you with HRMS related needs ?' 
-    
-    def start_chatting(self):
-        flag = True
-        response = {'edgecase1' : "I apologize, but I didn't quite understand your question. Could you please try rephrasing it or providing me with more details?  Thanks",
-               'edgecase2' : "Apologies ! I'm having trouble understanding your message in language other than English. Could you please try asking your question in English so that I can assist you better? Thanks"}
-        first_message = True
-        while flag:
-            if first_message:
-                first_message = False
-                total_apologies = 0
-                total_valid_queries = 0
-                return self.greeting()
-            raw_query = input("user : ")
-            raw_query = raw_query.strip()
-            # initialize_pipeline_instance
-            chat_instance = textpipeline(raw_query)
-            if chat_instance.server_down:
-                server_down_apology = chat_instance.give_apology()['server_down']
-                print(random.choice(server_down_apology))
-                flag = False
-            elif chat_instance.empty_query:                
-                flag2 = True
-                while flag2:
-                    end_conv = input("conversational AI : Do you want to end conversation ?\nplease press 'Y'- yes and 'N'- No \n")
-                    if end_conv.lower().startswith('y'):
-                        print("conversational AI :","\ncool ! happy to have conversation with you, Take care")
-                        flag,flag2 = False,False     #comes out of both while loop
-                    elif end_conv.lower().startswith('n'):
-                        print("conversational AI : ok great ! feel free to ask HRMS related needs")
-                        flag2 = False
-                    else:
-                        print("conversational AI : ","I am not understanding your response\nplease follow the instructions")
-            elif chat_instance.alpha_special_numeric or chat_instance.special_numeric:
-                print(response['edgecase1'])
-            elif chat_instance.non_english and chat.alpha_with_non_english:
-                print(response['edgecase2'])                
-            else:
-                total_valid_queries += 1
-                print(total_valid_queries)
-                if chat_instance.get_answer() == None:
-                    if total_apologies == 0:
-                        context_apology = chat_instance.give_apology()['unable_understand_context']
-                        print("conversational AI : ",random.choice(context_apology))
-                        total_apologies += 1
-                        print(total_apologies)
-                    elif total_apologies >= 1:
-                        contact_representative = chat_instance.give_apology()['contact_human']
-                        print("conversational AI : ",random.choice(contact_representative))
-                        total_apologies += 1
-                        print(total_apologies)
-                    else:
-                        server_down_apology = chat_instance.give_apology()['server_down']
-                        print("conversational AI : ",random.choice(server_down_apology))
-                else:
-                    print("conversational AI : ",chat_instance.get_answer())
-                    
-# --------------------------------------------------------------------------------------------------

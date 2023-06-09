@@ -19,17 +19,6 @@ import os
 
 from sklearn.metrics.pairwise import cosine_similarity
 
-def get_arrays():
-    for i in range(5):
-        with open(f'./data/array{i}.pickle','rb') as f:
-            array_chunck = pickle.load(f)
-            if i == 0:
-                total_arrays = np.zeros_like(array_chunck)
-                total_arrays = array_chunck
-            total_arrays = np.append(total_arrays,array_chunck,axis=0)
-    total_arrays
-vectorized_array = get_arrays()
-
 if "history" not in st.session_state:
     st.session_state.history = []
 
